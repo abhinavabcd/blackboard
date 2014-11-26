@@ -1,0 +1,12 @@
+* {-webkit-text-size-adjust:none; margin: 0; padding: 0;}
+.hide {display: none; }
+body {padding:0; margin:0; background: transparent url(/imgs/draw/paper-bg.jpg); overflow: hidden; font-family: Arial, Helvetica, verdana, sans-serif;}
+canvas#panel {background: transparent; display: block;position: relative;cursor: crosshair; font-family: "MarkerFelt", "Comic Sans MS", arial, sans-serif;}
+canvas#panel.erase {cursor: url(/imgs/draw/erase.cur) 15 15, auto;}
+canvas#panel.text {cursor:text;}
+* {-webkit-text-size-adjust:none; margin: 0; padding: 0;}
+.hide {display: none; }
+canvas#panel { border: 1px solid #000;background: transparent; display: block;position: relative;cursor: crosshair; font-family: "MarkerFelt", "Comic Sans MS", arial, sans-serif;}
+canvas#panel.erase {cursor: url(/imgs/draw/erase.cur) 15 15, auto;}
+canvas#panel.text {cursor:text;}
+#container {float: left;height:800px;width:910px;position: relative;}

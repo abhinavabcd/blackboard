@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>black board</title>
+    <script type="text/javascript">
+	    var urlParams = {};
+	    (function () {
+	        var e,
+	            a = /\+/g,  // Regex for replacing addition symbol with a space
+	            r = /([^&=]+)=?([^&]*)/g,
+	            d = function (s) { return decodeURIComponent(s.replace(a, " ")); },
+	            q = window.location.search.substring(1);
+	
+	        while (e = r.exec(q))
+	           urlParams[d(e[1])] = d(e[2]);
+	    })();
+	    var _drawing_tool,_drawing_tool_2;
+	    var session_id=urlParams['session_id'];
+    </script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript" charset="utf-8"></script>    
+  <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.7.1/dojo/dojo.js" type="text/javascript" charset="utf-8"></script>    
+  <link rel="stylesheet" href="./css/user_page.css" type="text/css" />
+  
+  <script type="text/javascript" src="./js/streaming_data.js"></script>
+    <script type="text/javascript">
+	    	$(document).ready(function(){
+	    		init_drawing_tools();
+			   	get_data(0);
+		   });
+	   </script>    
+  </head>
+  <body>
+
+    <div id="container">
+      <canvas id="panel" width="900" height="600"></canvas>
+     </div>
+
+    <script type="text/javascript" src="./js/drawing_canvas.js"></script>
+    <script type="text/javascript" src="./js/canvas_user_init.js"></script>
+
+  </body>
+</html>
+

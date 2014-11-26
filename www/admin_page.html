@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>black board</title>
+  <script type="text/javascript">
+	    var urlParams = {};
+	    (function () {
+	        var e,
+	            a = /\+/g,  // Regex for replacing addition symbol with a space
+	            r = /([^&=]+)=?([^&]*)/g,
+	            d = function (s) { return decodeURIComponent(s.replace(a, " ")); },
+	            q = window.location.search.substring(1);
+	
+	        while (e = r.exec(q))
+	           urlParams[d(e[1])] = d(e[2]);
+	    })();
+	    var _drawing_tool,_drawing_tool_2;
+	    var session_id=urlParams['session_id'];
+    </script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript" charset="utf-8"></script>    
+  <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.7.1/dojo/dojo.js" type="text/javascript" charset="utf-8"></script>    
+  <script type="text/javascript" src="./js/streaming_data.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function(){
+	     	init_black_board();
+	     	get_data(0,function(){});
+		   	send_data();
+
+	$('#share_info').html("To share this url with your friends, share <span style='color:blue;' >http://"+window.location.host+"/user_page.html?session_id="+session_id+"</span>").css({'float':'left','width':'100px'});	
+	});
+    </script>    
+    
+<link rel="stylesheet" href="./css/admin_page.css" type="text/css" />
+  </head>
+  <body>
+
+    <div id="container">
+	    <div id="Col1" style="float:left;width:100px;">
+	    	<div id="Col1Fix">
+	      		<ul class="border" id="tools">
+	            	<li id="pen" class="active">Draw</li>
+	            	<li id="eraser" class="">Erase</li>
+	            </ul>
+
+	            <ul class="border" id="colors">
+					<li class="active" id="black" val="#000000">Black</li>
+					<li id="brown" val="#5c330c"></li>
+	                <li id="red" val="#ff1800"></li>
+					<li id="orange" val="#ff7940"></li>
+	                <li id="yellow" val="#ffea00"></li>
+	                <li id="green" val="#42bd53"></li>
+	                <li id="blue" val="#0600ff"></li>
+					<li id="purple" val="#6633dd"></li>
+	            </ul>
+	    	</div>
+	    </div>
+	    <canvas id="panel" width="900" height="600"></canvas>
+	</div>
+	<div id="share_info" style="font-size:10px;font-weight:bold;">
+	</div>
+
+    <script type="text/javascript" src="./js/drawing_canvas.js"></script>
+    <script type="text/javascript" src="./js/canvas_admin_init.js"></script>
+
+  </body>
+</html>
+

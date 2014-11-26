@@ -1,0 +1,137 @@
+import os.path
+import re
+import tornado.auth
+import tornado.database
+import tornado.httpserver
+import tornado.ioloop
+import tornado.options
+import tornado.web
+import unicodedata
+import random
+import string
+from tornado.options import define, options
+import yajl as json
+
+define("port", default=8881, help="run on the given port", type=int)
+define("mysql_host", default="127.0.0.1:3306", help="database host")
+define("mysql_database", default="placement_questions", help="database name")
+define("mysql_user", default="root", help="database user")
+define("mysql_password", default="warriorwithin3", help="database password")
+
+
+class questions_application(tornado.web.Application):
+    def __init__(self):
+        settings = dict(
+            static_path=os.path.join(os.path.dirname(__file__), "www/"),
+            cookie_secret="11oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=",
+            login_url="/auth/login",
+            autoescape=None,
+        )
+        static_path = dict(path=settings['static_path'], default_filename='index.html')
+        self.sessions={} 
+        handlers = [
+            (r"/state/(.*)", _state),
+            (r"/new_session", new_session),
+            (r"/(.*)", tornado.web.StaticFileHandler,static_path)               
+        ]
+        tornado.web.Application.__init__(self, handlers, **settings)
+
+        # Have one global connection to the blog DB across all handlers
+        #-------------------------------- self.db = tornado.database.Connection(
+            #--------- host=options.mysql_host, database=options.mysql_database,
+            #--------- user=options.mysql_user, password=options.mysql_password)
+
+
+def clear_unused_sessions(sessions, session_id):
+    #TODO : implement this 
+    pass
+
+def create_new_session():
+    #TODO implement this 
+    pass
+
+   
+class _state(tornado.web.RequestHandler):
+    def prepare(self):    
+        pass
+    def get(self):
+        self.post()
+     
+    @tornado.web.asynchronous    
+    def post(self,session_id):
+        session_info=self.application.sessions.get(session_id,None)
+        if(not session_info):
+                self.finish({'error':'Invalid'})
+                return 
+        self.session_info=session_info    
+        
+        task=self.get_argument('task', None)            
+        if(task=='add_new_data'):
+            self.add_new_data(session_info, self.get_argument('new_data',None),self.get_argument('ack_id',None))
+            return
+        if(task=='get_data'):
+            self.get_if_any_data(session_info,self.get_argument('ack_id',None))
+
+    def add_new_data(self,session_info,new_data,old_ack_id):
+        new_data=json.loads(new_data)
+        #print new_data
+        user_status=self.get_secure_cookie(session_info['session_id'])
+        if(not user_status or not (user_status=='admin') or not old_ack_id):
+            self.finish({'error':"You cannot sir !"})
+            return
+        old_ack_id=int(old_ack_id)
+        user_stream_data=None
+        
+        if(new_data.get('pic_state')):
+            session_info['start_from']=old_ack_id+1 ##one change done jus now , so add one
+            session_info['pic_state']=new_data['pic_state']
+            session_info['data']=[]
+            user_stream_data={'data':[],'pic_state':new_data['pic_state']}
+        else:    
+            session_info['data'].append(new_data['data'])
+            user_stream_data={'data':[new_data['data']]}
+            
+        ack_id=session_info['start_from']+len(session_info['data'])
+        user_stream_data['ack_id']=ack_id
+        
+        for i in session_info['connections'].keys():
+            i.finish(user_stream_data)
+            del session_info['connections'][i]                
+        
+        self.finish({'ack_id':ack_id}) # to admin
+                        
+    def get_if_any_data(self,session_info,ack_id):
+        ack_id=int(ack_id)
+        current_ack_id=session_info['start_from']+len(session_info['data'])
+
+        if(ack_id<session_info['start_from']):
+            self.finish({'pic_state':session_info['pic_state'],'data':session_info['data'],'ack_id':current_ack_id}) # add check point data here
+            return
+        
+        if(ack_id<current_ack_id and ack_id>session_info['start_from']):
+            self.finish({'data':session_info['data'][ack_id-session_info['start_from']:],'ack_id':current_ack_id}) # add check point data here
+            return
+        
+        session_info['connections'][self]=self #add to pending connections
+    
+    def on_connection_close(self):
+        del self.session_info['connections'][self]
+        
+class new_session(tornado.web.RequestHandler):
+    def prepare(self):
+        pass
+    def get(self):
+        session_id=''.join(random.choice(string.ascii_lowercase + string.digits) for x in range(15))
+        self.application.sessions[session_id]={'start_from':0,'pic_state':'','data':[],'connections':{},'checkpoints':[],"session_id":session_id}
+        self.set_secure_cookie(session_id,'admin')
+        self.redirect('./admin_page.html?session_id='+session_id)
+        
+def main():
+    tornado.options.parse_command_line()
+    http_server = tornado.httpserver.HTTPServer(questions_application())
+    http_server.listen(options.port)
+    tornado.ioloop.IOLoop.instance().start()
+
+
+if __name__ == "__main__":
+    main()
